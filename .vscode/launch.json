@@ -2,6 +2,22 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "localRoot": "${workspaceFolder}/client",
+      "type": "node",
+      "request": "launch",
+      "name": "Launch Vite Dev Server",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "dev"
+      ],
+      "env": {
+        "NODE_ENV": "development"
+      },
+      "console": "integratedTerminal",
+      "outputCapture": "std"
+    },
+    {
       "type": "node",
       "request": "launch",
       "name": "Launch LibreChat (debug)",

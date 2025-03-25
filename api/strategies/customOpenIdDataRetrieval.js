@@ -21,6 +21,9 @@ async function mapCustomOpenIdDataAzure(accessToken, customOpenIdFields) {
             }
         });
     }
+
+    return customData;
+
 }
 
 // The implementation below is not tested, that's why it is commented out

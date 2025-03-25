@@ -3,41 +3,61 @@ const { logger } = require('~/config');
 
 const options = [
   {
-    label: 'idea',
-    value: 'com_ui_idea',
+    label: 'General',
+    value: 'com_ui_general',
   },
   {
-    label: 'travel',
-    value: 'com_ui_travel',
+    label: 'Academy',
+    value: 'com_ui_academy',
   },
   {
-    label: 'teach_or_explain',
-    value: 'com_ui_teach_or_explain',
+    label: 'Client Experience',
+    value: 'com_ui_client_experience',
   },
   {
-    label: 'write',
-    value: 'com_ui_write',
+    label: 'IT',
+    value: 'com_ui_it',
   },
   {
-    label: 'shop',
-    value: 'com_ui_shop',
+    label: 'Education Hub',
+    value: 'com_ui_education_hub',
   },
   {
-    label: 'code',
-    value: 'com_ui_code',
+    label: 'Engineering',
+    value: 'com_ui_engineering',
   },
   {
-    label: 'misc',
-    value: 'com_ui_misc',
-  },
-  {
-    label: 'roleplay',
-    value: 'com_ui_roleplay',
-  },
-  {
-    label: 'finance',
+    label: 'Finance',
     value: 'com_ui_finance',
   },
+  {
+    label: 'Management',
+    value: 'com_ui_management',
+  },
+  {
+    label: 'Marketing',
+    value: 'com_ui_marketing',
+  },
+  {
+    label: 'People and Culture',
+    value: 'com_ui_people_and_culture',
+  },
+  {
+    label: 'Product Management',
+    value: 'com_ui_product_management',
+  },
+  {
+    label: 'Professional Services',
+    value: 'com_ui_professional_services',
+  },
+  {
+    label: 'Sales',
+    value: 'com_ui_sales',
+  },
+  {
+    label: 'Support',
+    value: 'com_ui_support',
+  }
 ];
 
 module.exports = {
