@@ -1,9 +1,11 @@
+const { z } = require('zod');
 const { tool } = require('@langchain/core/tools');
-const { Constants: AgentConstants } = require('@librechat/agents');
+const { Constants: AgentConstants, Providers } = require('@librechat/agents');
 const {
   Constants,
-  convertJsonSchemaToZod,
+  ContentTypes,
   isAssistantsEndpoint,
+  convertJsonSchemaToZod,
 } = require('librechat-data-provider');
 const { logger, getMCPManager } = require('~/config');
 
@@ -25,15 +27,34 @@ async function createMCPTool({ req, toolKey, provider }) {
   }
   /** @type {LCTool} */
   const { description, parameters } = toolDefinition;
-  const schema = convertJsonSchemaToZod(parameters);
+  const isGoogle = provider === Providers.VERTEXAI || provider === Providers.GOOGLE;
+  let schema = convertJsonSchemaToZod(parameters, {
+    allowEmptyObject: !isGoogle,
+  });
+
+  if (!schema) {
+    schema = z.object({ input: z.string().optional() });
+  }
+
   const [toolName, serverName] = toolKey.split(Constants.mcp_delimiter);
-  /** @type {(toolInput: Object | string) => Promise<unknown>} */
-  const _call = async (toolInput) => {
+  /** @type {(toolArguments: Object | string, config?: GraphRunnableConfig) => Promise<unknown>} */
+  const _call = async (toolArguments, config) => {
     try {
       const mcpManager = await getMCPManager();
-      const result = await mcpManager.callTool(serverName, toolName, provider, toolInput);
+      const result = await mcpManager.callTool({
+        serverName,
+        toolName,
+        provider,
+        toolArguments,
+        options: {
+          signal: config?.signal,
+        },
+      });
       if (isAssistantsEndpoint(provider) && Array.isArray(result)) {
         return result[0];
+      }
+      if (isGoogle && Array.isArray(result[0]) && result[0][0]?.type === ContentTypes.TEXT) {
+        return [result[0][0].text, result[1]];
       }
       return result;
     } catch (error) {

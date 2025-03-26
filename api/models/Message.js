@@ -52,6 +52,15 @@ async function saveMessage(req, params, metadata) {
       user: req.user.id,
       messageId: params.newMessageId || params.messageId,
     };
+
+    if (req?.body?.isTemporary) {
+      const expiredAt = new Date();
+      expiredAt.setDate(expiredAt.getDate() + 30);
+      update.expiredAt = expiredAt;
+    } else {
+      update.expiredAt = null;
+    }
+
     const message = await Message.findOneAndUpdate(
       { messageId: params.messageId, user: req.user.id },
       update,
@@ -62,7 +71,42 @@ async function saveMessage(req, params, metadata) {
   } catch (err) {
     logger.error('Error saving message:', err);
     logger.info(`---\`saveMessage\` context: ${metadata?.context}`);
-    throw err;
+
+    // Check if this is a duplicate key error (MongoDB error code 11000)
+    if (err.code === 11000 && err.message.includes('duplicate key error')) {
+      // Log the duplicate key error but don't crash the application
+      logger.warn(`Duplicate messageId detected: ${params.messageId}. Continuing execution.`);
+
+      try {
+        // Try to find the existing message with this ID
+        const existingMessage = await Message.findOne({
+          messageId: params.messageId,
+          user: req.user.id,
+        });
+
+        // If we found it, return it
+        if (existingMessage) {
+          return existingMessage.toObject();
+        }
+
+        // If we can't find it (unlikely but possible in race conditions)
+        return {
+          ...params,
+          messageId: params.messageId,
+          user: req.user.id,
+        };
+      } catch (findError) {
+        // If the findOne also fails, log it but don't crash
+        logger.warn(`Could not retrieve existing message with ID ${params.messageId}: ${findError.message}`);
+        return {
+          ...params,
+          messageId: params.messageId,
+          user: req.user.id,
+        };
+      }
+    }
+
+    throw err; // Re-throw other errors
   }
 }
 
