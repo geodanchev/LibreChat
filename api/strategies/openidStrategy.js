@@ -110,7 +110,7 @@ async function mapCustomOpenIdData(accessToken, customOpenIdFields) {
 
   const mapper = PROVIDER_MAPPERS[process.env.OPENID_CUSTOM_DATA_PROVIDER]
   if (!mapper) {
-    throw new Error(`No mapper found for provider: ${provider}`);
+    throw new Error(`No mapper found for provider: ${process.env.OPENID_CUSTOM_DATA_PROVIDER}`);
   }
 
   customData = await mapper(accessToken, customOpenIdFields);
