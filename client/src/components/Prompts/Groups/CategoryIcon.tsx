@@ -13,7 +13,8 @@ import {
   Kanban,
   Cog,
   HandCoins,
-  Wrench
+  Wrench,
+  Building
 } from 'lucide-react';
 import { cn } from '~/utils';
 
@@ -27,11 +28,12 @@ const categoryIconMap: Record<string, React.ElementType> = {
   com_ui_it: Laptop,
   com_ui_management: Lightbulb,
   com_ui_marketing: Megaphone,
-  com_ui_people_and_culture:Smile,
+  com_ui_people_and_culture: Smile,
   com_ui_product_management: Kanban,
   com_ui_professional_services: Cog,
   com_ui_sales: HandCoins,
   com_ui_support: Wrench,
+  com_ui_business_applications: Building
 };
 
 // const categoryColorMap: Record<string, string> = {

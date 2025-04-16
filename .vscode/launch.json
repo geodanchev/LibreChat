@@ -1,6 +1,18 @@
 {
   "version": "0.2.0",
   "configurations": [
+    //execute ts-node src/index.ts
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Launch LibreChat (ts-node)",
+      "skipFiles": ["<node_internals>/**"],
+      "program": "${workspaceFolder}/api/server/index.ts",
+      "preLaunchTask": "npm: build",
+      "outFiles": ["${workspaceFolder}/dist/**/*.js"],
+      "console": "integratedTerminal",
+      "envFile": "${workspaceFolder}/.env"
+    },
     {
       "type": "node",
       "request": "launch",
