@@ -10,7 +10,7 @@ const options = [
     value: 'com_ui_academy',
   },
   {
-    label: 'Client Experience',
+    label: 'Customer Success',
     value: 'com_ui_client_experience',
   },
   {
@@ -56,6 +56,10 @@ const options = [
   {
     label: 'Support',
     value: 'com_ui_support',
+  },
+  {
+    label: 'Business Applications',
+    value: 'com_ui_business_applications',
   }
 ];
 
