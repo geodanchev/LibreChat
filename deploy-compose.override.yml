@@ -1,0 +1,33 @@
+services:
+  api:
+    environment:
+      - MONGO_URI=${MONGO_URI}
+      - MEILI_HOST=${MEILI_HOST}
+      - AZURE_OPENAI_API_KEY=${AZURE_OPENAI_API_KEY}
+      - DALLE_API_KEY=${DALLE_API_KEY}
+      - DALLE3_API_KEY=${DALLE3_API_KEY}
+      - OPENID_CLIENT_ID=${OPENID_CLIENT_ID}
+      - OPENID_CLIENT_SECRET=${OPENID_CLIENT_SECRET}
+      - OPENID_SESSION_SECRET=${OPENID_SESSION_SECRET}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
+      - CREDS_KEY=${CREDS_KEY}
+      - CREDS_IV=${CREDS_IV}
+      - MEILI_MASTER_KEY=${MEILI_MASTER_KEY}
+  meilisearch:
+    environment:
+      - MEILI_MASTER_KEY=${MEILI_MASTER_KEY}
+  vectordb:
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+  rag_api:
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - AZURE_OPENAI_API_KEY=${AZURE_OPENAI_API_KEY}
+  client:
+    environment:
+      - KEYVAULT_NAME=Librechat-secrets
+      - CERTIFICATE_NAME=star-docuware-com
+  
