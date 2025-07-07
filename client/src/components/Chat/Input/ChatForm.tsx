@@ -300,9 +300,11 @@ const ChatForm = memo(({ index = 0 }: { index?: number }) => {
                 isRTL ? 'flex-row-reverse' : 'flex-row',
               )}
             >
-              <div className={`${isRTL ? 'mr-2' : 'ml-2'}`}>
-                <AttachFileChat disableInputs={disableInputs} />
-              </div>
+              {!(isAgentsEndpoint(endpoint) || isAssistantsEndpoint(endpoint)) && (
+                <div className={`${isRTL ? 'mr-2' : 'ml-2'}`}>
+                  <AttachFileChat disableInputs={disableInputs} />
+                </div>
+              )}
               <BadgeRow
                 showEphemeralBadges={false}
                 conversationId={conversationId}
