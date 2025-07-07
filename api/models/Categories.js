@@ -6,10 +6,6 @@ const options = [
     value: 'com_ui_general',
   },
   {
-    label: 'Academy',
-    value: 'com_ui_academy',
-  },
-  {
     label: 'Business Applications',
     value: 'com_ui_business_applications',
   },
@@ -58,9 +54,17 @@ const options = [
     value: 'com_ui_sales',
   },
   {
+    label: 'Strategy and Controlling',
+    value: 'com_ui_strategy_and_controlling',
+  },
+  {
     label: 'Support',
     value: 'com_ui_support',
-  }
+  },
+  {
+    label: 'S&C Enablement',
+    value: 'com_ui_academy',
+  },
 ];
 
 module.exports = {
