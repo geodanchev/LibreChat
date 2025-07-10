@@ -1,8 +1,9 @@
-import { memo } from 'react';
-import { useParams } from 'react-router-dom';
+import { memo, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useGetSharedMessages } from 'librechat-data-provider/react-query';
 import { useLocalize, useDocumentTitle } from '~/hooks';
 import { useGetStartupConfig } from '~/data-provider';
+import { useAuthContext } from '~/hooks/AuthContext';
 import { ShareContext } from '~/Providers';
 import { Spinner } from '~/components/svg';
 import MessagesView from './MessagesView';
@@ -13,6 +14,8 @@ function SharedView() {
   const localize = useLocalize();
   const { data: config } = useGetStartupConfig();
   const { shareId } = useParams();
+  const navigate = useNavigate();
+  const { isAuthenticated } = useAuthContext();
   const { data, isLoading } = useGetSharedMessages(shareId ?? '');
   const dataTree = data && buildTree({ messages: data.messages });
   const messagesTree = dataTree?.length === 0 ? null : dataTree ?? null;
@@ -51,13 +54,24 @@ function SharedView() {
         <MessagesView messagesTree={messagesTree} conversationId={data.conversationId} />
       </>
     );
-  } else {
+  } else if (isAuthenticated) {
     content = (
       <div className="flex h-screen items-center justify-center ">
         {localize('com_ui_shared_link_not_found')}
       </div>
     );
+  } else {
+    content = (<div className="flex h-screen items-center justify-center ">
+      redirecting to login...
+    </div>
+    );
   }
+  // Redirect to login if not authenticated and data is missing (not loading)
+  useEffect(() => {
+    if (!isLoading && !data && !isAuthenticated) {
+      navigate('/login', { replace: true });
+    }
+  }, [isLoading, data, isAuthenticated, navigate]);
 
   return (
     <ShareContext.Provider value={{ isSharedConvo: true }}>
