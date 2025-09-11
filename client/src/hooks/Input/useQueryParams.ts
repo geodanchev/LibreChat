@@ -1,4 +1,4 @@
-import { useEffect, useCallback, useRef } from 'react';
+import { useEffect, useCallback, useRef, useState } from 'react';
 import { useRecoilValue } from 'recoil';
 import { useSearchParams } from 'react-router-dom';
 import { QueryClient, useQueryClient } from '@tanstack/react-query';
@@ -22,6 +22,7 @@ import { useAuthContext, useAgentsMap, useDefaultConvo, useSubmitMessage } from 
 import { useChatContext, useChatFormContext } from '~/Providers';
 import { useGetAgentByIdQuery } from '~/data-provider';
 import store from '~/store';
+import { useSetRecoilState } from 'recoil';
 
 /**
  * Parses query parameter values, converting strings to their appropriate types.
@@ -57,7 +58,7 @@ const processValidSettings = (queryParams: Record<string, string>) => {
         validSettings[key] = validValue;
       }
     } catch (error) {
-      console.warn(`Invalid value for setting ${key}:`, error);
+
     }
   });
 
@@ -112,6 +113,10 @@ export default function useQueryParams({
   const settingsAppliedRef = useRef(false);
   const submissionHandledRef = useRef(false);
   const promptTextRef = useRef<string | null>(null);
+  const [validSettings, setValidSettings] = useState<TPreset | null>(null);
+  // Debug: log validSettings on every render
+  useEffect(() => {
+  }, [validSettings]);
   const validSettingsRef = useRef<TPreset | null>(null);
   const settingsTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -121,6 +126,9 @@ export default function useQueryParams({
   const modularChat = useRecoilValue(store.modularChat);
   const availableTools = useRecoilValue(store.availableTools);
   const { submitMessage } = useSubmitMessage();
+  const setIsTemporary = useSetRecoilState(store.isTemporary);
+  const isTemporaryGlobal = useRecoilValue(store.isTemporary);
+  const tempFlagRef = useRef(false);
 
   const queryClient = useQueryClient();
   const { conversation, newConversation } = useChatContext();
@@ -165,7 +173,9 @@ export default function useQueryParams({
         for (const [key, value] of Object.entries(endpointsConfig)) {
           if (
             value &&
-            value.type === EModelEndpoint.custom &&
+            typeof value === 'object' &&
+            'type' in value &&
+            (value as { type?: string }).type === EModelEndpoint.custom &&
             key.toLowerCase() === normalizedNewEndpoint
           ) {
             newEndpoint = key;
@@ -243,9 +253,9 @@ export default function useQueryParams({
    * Returns true only when all relevant settings match the target values.
    */
   const areSettingsApplied = useCallback(() => {
-    if (!validSettingsRef.current || !conversation) {
-      return false;
-    }
+if (!validSettingsRef.current || !conversation) {
+  return false;
+}
 
     for (const [key, value] of Object.entries(validSettingsRef.current)) {
       if (['presetOverride', 'iconURL', 'spec', 'modelLabel'].includes(key)) {
@@ -265,29 +275,35 @@ export default function useQueryParams({
    * Sets the prompt text, submits the message, and cleans up URL parameters afterward.
    * Has internal guards to ensure it only executes once regardless of how many times it's called.
    */
-  const processSubmission = useCallback(() => {
-    if (submissionHandledRef.current || !pendingSubmitRef.current || !promptTextRef.current) {
-      return;
-    }
+const processSubmission = useCallback(() => {
+if (submissionHandledRef.current || !pendingSubmitRef.current || !promptTextRef.current) {
+  return;
+}
 
     submissionHandledRef.current = true;
     pendingSubmitRef.current = false;
 
+    // Set the prompt in the input before submitting
     methods.setValue('text', promptTextRef.current, { shouldValidate: true });
 
     methods.handleSubmit((data) => {
       if (data.text?.trim()) {
         submitMessage(data);
 
+        // Only after successful submission, clean up the URL and clear the prompt
         const newUrl = window.location.pathname;
         window.history.replaceState({}, '', newUrl);
 
-        console.log('Message submitted with conversation state:', conversation);
+        // Optionally, clear the promptTextRef here if needed
+        promptTextRef.current = null;
       }
     })();
   }, [methods, submitMessage, conversation]);
 
+// Refactored: Move interval logic into useEffect and synchronize with React state updates
   useEffect(() => {
+    let intervalId: ReturnType<typeof setInterval> | null = null;
+
     const processQueryParams = () => {
       const queryParams: Record<string, string> = {};
       searchParams.forEach((value, key) => {
@@ -297,24 +313,34 @@ export default function useQueryParams({
       // Support both 'prompt' and 'q' as query parameters, with 'prompt' taking precedence
       const decodedPrompt = queryParams.prompt || queryParams.q || '';
       const shouldAutoSubmit = queryParams.submit?.toLowerCase() === 'true';
+      const isTemporary = queryParams.temp?.toLowerCase() === 'true';
       delete queryParams.prompt;
       delete queryParams.q;
       delete queryParams.submit;
+      delete queryParams.temp;
       const validSettings = processValidSettings(queryParams);
+
+      // Always reset isTemporary to false unless temp=true is present
+      if (isTemporary) {
+        validSettings.isTemporary = true;
+        setIsTemporary(true);
+        tempFlagRef.current = true;
+      } else {
+        setIsTemporary(false);
+        tempFlagRef.current = false;
+      }
 
       return { decodedPrompt, validSettings, shouldAutoSubmit };
     };
 
-    const intervalId = setInterval(() => {
-      if (processedRef.current || attemptsRef.current >= maxAttempts) {
-        clearInterval(intervalId);
-        if (attemptsRef.current >= maxAttempts) {
-          console.warn('Max attempts reached, failed to process parameters');
-        }
+    let attempts = 0;
+    intervalId = setInterval(() => {
+      if (processedRef.current || attempts >= maxAttempts) {
+        if (intervalId) clearInterval(intervalId);
         return;
       }
 
-      attemptsRef.current += 1;
+      attempts += 1;
 
       if (!textAreaRef.current) {
         return;
@@ -326,33 +352,14 @@ export default function useQueryParams({
 
       const { decodedPrompt, validSettings, shouldAutoSubmit } = processQueryParams();
 
-      if (!shouldAutoSubmit) {
-        submissionHandledRef.current = true;
-      }
-
-      /** Mark processing as complete and clean up as needed */
-      const success = () => {
-        const paramString = searchParams.toString();
-        const currentParams = new URLSearchParams(paramString);
-        currentParams.delete('prompt');
-        currentParams.delete('q');
-        currentParams.delete('submit');
-
-        setSearchParams(currentParams, { replace: true });
-        processedRef.current = true;
-        console.log('Parameters processed successfully', paramString);
-        clearInterval(intervalId);
-
-        // Only clean URL if there's no pending submission
-        if (!pendingSubmitRef.current) {
-          const newUrl = window.location.pathname;
-          window.history.replaceState({}, '', newUrl);
-        }
-      };
-
       // Store settings for later comparison
-      if (Object.keys(validSettings).length > 0) {
+      if (Object.keys(validSettings).length > 0 || (shouldAutoSubmit && decodedPrompt)) {
         validSettingsRef.current = validSettings;
+        setValidSettings(validSettings); // This will trigger the auto-submit effect
+        if (intervalId) {
+          clearInterval(intervalId);
+          intervalId = null;
+        }
       }
 
       // Save the prompt text for later use if needed
@@ -360,49 +367,48 @@ export default function useQueryParams({
         promptTextRef.current = decodedPrompt;
       }
 
-      // Handle auto-submission
-      if (shouldAutoSubmit && decodedPrompt) {
-        if (Object.keys(validSettings).length > 0) {
-          // Settings are changing, defer submission
-          pendingSubmitRef.current = true;
-
-          // Set a timeout to handle the case where settings might never fully apply
-          settingsTimeoutRef.current = setTimeout(() => {
-            if (!submissionHandledRef.current && pendingSubmitRef.current) {
-              console.warn(
-                'Settings application timeout reached, proceeding with submission anyway',
-              );
-              processSubmission();
-            }
-          }, MAX_SETTINGS_WAIT_MS);
-        } else {
+      // Only mark as processed if not auto-submitting, otherwise wait for settings to apply
+      if (!shouldAutoSubmit) {
+        submissionHandledRef.current = true;
+        processedRef.current = true;
+        // Set the prompt in the input if present
+        if (decodedPrompt) {
           methods.setValue('text', decodedPrompt, { shouldValidate: true });
           textAreaRef.current.focus();
           textAreaRef.current.setSelectionRange(decodedPrompt.length, decodedPrompt.length);
-
-          methods.handleSubmit((data) => {
-            if (data.text?.trim()) {
-              submitMessage(data);
-            }
-          })();
         }
-      } else if (decodedPrompt) {
-        methods.setValue('text', decodedPrompt, { shouldValidate: true });
-        textAreaRef.current.focus();
-        textAreaRef.current.setSelectionRange(decodedPrompt.length, decodedPrompt.length);
+        // Clean up URL params (including temp) after processing
+        const paramString = searchParams.toString();
+        const currentParams = new URLSearchParams(paramString);
+        currentParams.delete('prompt');
+        currentParams.delete('q');
+        currentParams.delete('submit');
+        currentParams.delete('temp');
+        setSearchParams(currentParams, { replace: true });
+        const newUrl = window.location.pathname + (currentParams.toString() ? '?' + currentParams.toString() : '');
+        window.history.replaceState({}, '', newUrl);
+        return;
       } else {
-        submissionHandledRef.current = true;
+        // If auto-submitting, set pendingSubmitRef so the effect can trigger submission.
+        if (shouldAutoSubmit && decodedPrompt) {
+          pendingSubmitRef.current = true;
+        }
       }
 
+      // If auto-submitting, wait for settings to be applied before processing submission
       if (Object.keys(validSettings).length > 0) {
-        newQueryConvo(validSettings);
+        if (tempFlagRef.current) {
+          if (isTemporaryGlobal) {
+            newQueryConvo(validSettings);
+          }
+        } else {
+          newQueryConvo(validSettings);
+        }
       }
-
-      success();
     }, 100);
 
     return () => {
-      clearInterval(intervalId);
+      if (intervalId) clearInterval(intervalId);
       if (settingsTimeoutRef.current) {
         clearTimeout(settingsTimeoutRef.current);
       }
@@ -417,36 +423,71 @@ export default function useQueryParams({
     setSearchParams,
     queryClient,
     processSubmission,
+    isTemporaryGlobal,
   ]);
 
   useEffect(() => {
+    // Log all guard values at the start of the effect
+
     // Only proceed if we've already processed URL parameters but haven't yet handled submission
     if (
-      !processedRef.current ||
-      submissionHandledRef.current ||
-      settingsAppliedRef.current ||
-      !validSettingsRef.current ||
-      !conversation
+      !processedRef.current &&
+      !submissionHandledRef.current &&
+      !settingsAppliedRef.current &&
+      conversation &&
+      promptTextRef.current // <-- Only run if prompt is available
     ) {
-      return;
-    }
+      validSettingsRef.current = validSettings;
 
-    const allSettingsApplied = areSettingsApplied();
+      // Determine if we should allow submission even if areSettingsApplied is false
+      const allSettingsApplied = validSettings ? areSettingsApplied() : true;
+      const onlyIsTemporary =
+        validSettings &&
+        Object.keys(validSettings).length === 1 &&
+        validSettings.isTemporary === true;
 
-    if (allSettingsApplied) {
-      settingsAppliedRef.current = true;
+      // Allow submission if:
+      // - allSettingsApplied (original logic)
+      // - OR only setting is isTemporary and it matches the global state
+      // - OR there are no settings but a prompt and submit=true are present
+      const allowSubmission =
+        allSettingsApplied ||
+        (onlyIsTemporary && isTemporaryGlobal) ||
+        (!validSettings && promptTextRef.current);
 
-      if (pendingSubmitRef.current) {
-        if (settingsTimeoutRef.current) {
-          clearTimeout(settingsTimeoutRef.current);
-          settingsTimeoutRef.current = null;
+
+
+      if (allowSubmission) {
+        settingsAppliedRef.current = true;
+
+        // If pending auto-submit, process it now
+        if (pendingSubmitRef.current || promptTextRef.current) {
+          // Set the prompt in the input before submitting
+          if (promptTextRef.current) {
+            methods.setValue('text', promptTextRef.current, { shouldValidate: true });
+            textAreaRef.current?.focus();
+            textAreaRef.current?.setSelectionRange(promptTextRef.current.length, promptTextRef.current.length);
+          }
+          pendingSubmitRef.current = true;
+          processSubmission();
+
+          // Clean up URL params (including temp) after submission
+          const paramString = searchParams.toString();
+          const currentParams = new URLSearchParams(paramString);
+          currentParams.delete('prompt');
+          currentParams.delete('q');
+          currentParams.delete('submit');
+          currentParams.delete('temp');
+          setSearchParams(currentParams, { replace: true });
+          const newUrl = window.location.pathname + (currentParams.toString() ? '?' + currentParams.toString() : '');
+          window.history.replaceState({}, '', newUrl);
+
+          processedRef.current = true;
         }
-
-        console.log('Settings fully applied, processing submission');
-        processSubmission();
       }
     }
-  }, [conversation, processSubmission, areSettingsApplied]);
+  }, [conversation, processSubmission, areSettingsApplied, methods, searchParams, setSearchParams, textAreaRef, validSettings, isTemporaryGlobal]);
+
 
   const { isAuthenticated } = useAuthContext();
   const agentsMap = useAgentsMap({ isAuthenticated });
