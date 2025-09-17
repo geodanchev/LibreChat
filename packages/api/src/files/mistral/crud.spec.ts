@@ -47,7 +47,7 @@ import axios from 'axios';
 import type { Request as ExpressRequest } from 'express';
 import type { Readable } from 'stream';
 import type { MistralFileUploadResponse, MistralSignedUrlResponse, OCRResult } from '~/types';
-import { logger as mockLogger } from '@librechat/data-schemas';
+import { logger as mockLogger, IUser } from '@librechat/data-schemas';
 import {
   uploadDocumentToMistral,
   uploadMistralOCR,
@@ -456,7 +456,7 @@ describe('MistralOCR Service', () => {
             },
           },
         },
-      } as unknown as ExpressRequest;
+      } as unknown as ExpressRequest & { user?: IUser };
 
       const file = {
         path: '/tmp/upload/file.pdf',
@@ -557,7 +557,7 @@ describe('MistralOCR Service', () => {
             },
           },
         },
-      } as unknown as ExpressRequest;
+      } as unknown as ExpressRequest & { user?: IUser };
 
       const file = {
         path: '/tmp/upload/image.png',
@@ -656,7 +656,7 @@ describe('MistralOCR Service', () => {
             },
           },
         },
-      } as unknown as ExpressRequest;
+      } as unknown as ExpressRequest & { user?: IUser };
 
       // Set environment variable for model
       process.env.CUSTOM_MODEL = 'mistral-large';
@@ -749,7 +749,7 @@ describe('MistralOCR Service', () => {
             },
           },
         },
-      } as unknown as ExpressRequest;
+      } as unknown as ExpressRequest & { user?: IUser };
 
       const file = {
         path: '/tmp/upload/file.pdf',
@@ -802,7 +802,7 @@ describe('MistralOCR Service', () => {
             },
           },
         },
-      } as unknown as ExpressRequest;
+      } as unknown as ExpressRequest & { user?: IUser };
 
       const file = {
         path: '/tmp/upload/file.pdf',
@@ -889,7 +889,7 @@ describe('MistralOCR Service', () => {
             },
           },
         },
-      } as unknown as ExpressRequest;
+      } as unknown as ExpressRequest & { user?: IUser };
 
       const file = {
         path: '/tmp/upload/file.pdf',
@@ -978,7 +978,7 @@ describe('MistralOCR Service', () => {
             },
           },
         },
-      } as unknown as ExpressRequest;
+      } as unknown as ExpressRequest & { user?: IUser };
 
       const file = {
         path: '/tmp/upload/file.pdf',
@@ -1092,7 +1092,7 @@ describe('MistralOCR Service', () => {
             },
           },
         },
-      } as unknown as ExpressRequest;
+      } as unknown as ExpressRequest & { user?: IUser };
 
       const file = {
         path: '/tmp/upload/file.pdf',
@@ -1234,7 +1234,7 @@ describe('MistralOCR Service', () => {
               },
             },
           },
-        } as unknown as ExpressRequest;
+        } as unknown as ExpressRequest & { user?: IUser };
 
         const file = {
           path: '/tmp/upload/file.pdf',
@@ -1318,7 +1318,7 @@ describe('MistralOCR Service', () => {
               },
             },
           },
-        } as unknown as ExpressRequest;
+        } as unknown as ExpressRequest & { user?: IUser };
 
         const file = {
           path: '/tmp/upload/file.pdf',
@@ -1399,7 +1399,7 @@ describe('MistralOCR Service', () => {
             },
           },
         },
-      } as unknown as ExpressRequest;
+      } as unknown as ExpressRequest & { user?: IUser };
 
       const file = {
         path: '/tmp/upload/azure-file.pdf',
@@ -1475,7 +1475,7 @@ describe('MistralOCR Service', () => {
               },
             },
           },
-        } as unknown as ExpressRequest;
+        } as unknown as ExpressRequest & { user?: IUser };
 
         const file = {
           path: '/tmp/upload/file.pdf',
@@ -1539,7 +1539,7 @@ describe('MistralOCR Service', () => {
               },
             },
           },
-        } as unknown as ExpressRequest;
+        } as unknown as ExpressRequest & { user?: IUser };
 
         const file = {
           path: '/tmp/upload/file.pdf',

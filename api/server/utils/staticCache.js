@@ -28,6 +28,7 @@ function staticCache(staticPath, options = {}) {
       return;
     }
     if (filePath && filePath.includes('/dist/images/')) {
+      res.setHeader('Cache-Control', `public, max-age=0`);
       return;
     }
     const fileName = filePath ? path.basename(filePath) : '';

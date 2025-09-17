@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import FormData from 'form-data';
-import { logger } from '@librechat/data-schemas';
+import { logger, IUser } from '@librechat/data-schemas';
 import {
   FileSources,
   envVarRegex,
@@ -42,14 +42,7 @@ interface GoogleServiceAccount {
 
 /** Helper type for OCR request context */
 interface OCRContext {
-  req: Pick<ServerRequest, 'user' | 'app'> & {
-    user?: { id: string };
-    app: {
-      locals?: {
-        ocr?: TCustomConfig['ocr'];
-      };
-    };
-  };
+  req: ServerRequest & { user?: IUser };
   file: Express.Multer.File;
   loadAuthValues: (params: {
     userId: string;

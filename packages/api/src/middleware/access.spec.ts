@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from 'express';
+import { Request as ServerRequest, Response, NextFunction } from 'express';
 import {
   Permissions,
   PermissionTypes,
@@ -18,7 +18,7 @@ jest.mock('@librechat/data-schemas', () => ({
 }));
 
 describe('access middleware', () => {
-  let mockReq: Partial<Request>;
+  let mockReq: Partial<ServerRequest & { user?: IUser }>;
   let mockRes: Partial<Response>;
   let mockNext: jest.MockedFunction<NextFunction>;
   let mockGetRoleByName: jest.Mock;
@@ -35,7 +35,7 @@ describe('access middleware', () => {
       body: {},
       originalUrl: '/api/test',
       method: 'POST',
-    } as Partial<Request>;
+    } as Partial<ServerRequest & { user?: IUser }>;
 
     mockRes = {
       status: jest.fn().mockReturnThis(),
@@ -56,31 +56,31 @@ describe('access middleware', () => {
     });
 
     it('should return false when req.body.endpoint is not present', () => {
-      expect(skipAgentCheck(mockReq as Request)).toBe(false);
+      expect(skipAgentCheck(mockReq as ServerRequest & { user?: IUser })).toBe(false);
     });
 
     it('should return false when method is not POST', () => {
       mockReq.method = 'GET';
       mockReq.body = { endpoint: 'gpt-4' };
-      expect(skipAgentCheck(mockReq as Request)).toBe(false);
+      expect(skipAgentCheck(mockReq as ServerRequest & { user?: IUser })).toBe(false);
     });
 
     it('should return false when URL does not include agents endpoint', () => {
       mockReq.body = { endpoint: 'gpt-4' };
       mockReq.originalUrl = '/api/messages';
-      expect(skipAgentCheck(mockReq as Request)).toBe(false);
+      expect(skipAgentCheck(mockReq as ServerRequest & { user?: IUser })).toBe(false);
     });
 
     it('should return true when not an agents endpoint but URL includes agents', () => {
       mockReq.body = { endpoint: 'gpt-4' };
       mockReq.originalUrl = EndpointURLs[EModelEndpoint.agents];
-      expect(skipAgentCheck(mockReq as Request)).toBe(true);
+      expect(skipAgentCheck(mockReq as ServerRequest & { user?: IUser })).toBe(true);
     });
 
     it('should return false when is an agents endpoint', () => {
       mockReq.body = { endpoint: EModelEndpoint.agents };
       mockReq.originalUrl = EndpointURLs[EModelEndpoint.agents];
-      expect(skipAgentCheck(mockReq as Request)).toBe(false);
+      expect(skipAgentCheck(mockReq as ServerRequest & { user?: IUser })).toBe(false);
     });
   });
 
@@ -102,7 +102,7 @@ describe('access middleware', () => {
       const skipCheck = jest.fn().mockReturnValue(true);
       const result = await checkAccess({
         ...defaultParams,
-        req: mockReq as Request,
+        req: mockReq as ServerRequest & { user?: IUser },
         skipCheck,
       });
       expect(result).toBe(true);
@@ -299,7 +299,7 @@ describe('access middleware', () => {
         getRoleByName: mockGetRoleByName,
       });
 
-      await middleware(mockReq as Request, mockRes as Response, mockNext);
+      await middleware(mockReq as ServerRequest & { user?: IUser }, mockRes as Response, mockNext);
 
       expect(mockNext).toHaveBeenCalled();
       expect(mockRes.status).not.toHaveBeenCalled();
@@ -323,7 +323,7 @@ describe('access middleware', () => {
         getRoleByName: mockGetRoleByName,
       });
 
-      await middleware(mockReq as Request, mockRes as Response, mockNext);
+      await middleware(mockReq as ServerRequest & { user?: IUser }, mockRes as Response, mockNext);
 
       expect(mockNext).not.toHaveBeenCalled();
       expect(mockRes.status).toHaveBeenCalledWith(403);
@@ -357,7 +357,7 @@ describe('access middleware', () => {
         getRoleByName: mockGetRoleByName,
       });
 
-      await middleware(mockReq as Request, mockRes as Response, mockNext);
+      await middleware(mockReq as ServerRequest & { user?: IUser }, mockRes as Response, mockNext);
 
       expect(mockNext).toHaveBeenCalled();
       expect(mockRes.status).not.toHaveBeenCalled();
@@ -373,7 +373,7 @@ describe('access middleware', () => {
         getRoleByName: mockGetRoleByName,
       });
 
-      await middleware(mockReq as Request, mockRes as Response, mockNext);
+      await middleware(mockReq as ServerRequest & { user?: IUser }, mockRes as Response, mockNext);
 
       expect(skipCheck).toHaveBeenCalledWith(mockReq);
       expect(mockNext).toHaveBeenCalled();
@@ -390,7 +390,7 @@ describe('access middleware', () => {
         getRoleByName: mockGetRoleByName,
       });
 
-      await middleware(mockReq as Request, mockRes as Response, mockNext);
+      await middleware(mockReq as ServerRequest & { user?: IUser }, mockRes as Response, mockNext);
 
       expect(mockRes.status).toHaveBeenCalledWith(500);
       expect(mockRes.json).toHaveBeenCalledWith({
@@ -407,7 +407,7 @@ describe('access middleware', () => {
         getRoleByName: mockGetRoleByName,
       });
 
-      await middleware(mockReq as Request, mockRes as Response, mockNext);
+      await middleware(mockReq as ServerRequest & { user?: IUser }, mockRes as Response, mockNext);
 
       expect(mockRes.status).toHaveBeenCalledWith(500);
       expect(mockRes.json).toHaveBeenCalledWith({
@@ -440,7 +440,7 @@ describe('access middleware', () => {
         getRoleByName: mockGetRoleByName,
       });
 
-      await checkMemoryRead(mockReq as Request, mockRes as Response, mockNext);
+      await checkMemoryRead(mockReq as ServerRequest & { user?: IUser }, mockRes as Response, mockNext);
       expect(mockNext).toHaveBeenCalled();
 
       // Test memory create access
@@ -451,7 +451,7 @@ describe('access middleware', () => {
         getRoleByName: mockGetRoleByName,
       });
 
-      await checkMemoryCreate(mockReq as Request, mockRes as Response, mockNext);
+      await checkMemoryCreate(mockReq as ServerRequest & { user?: IUser }, mockRes as Response, mockNext);
       expect(mockNext).toHaveBeenCalled();
     });
 
@@ -476,7 +476,7 @@ describe('access middleware', () => {
         getRoleByName: mockGetRoleByName,
       });
 
-      await checkAgentAccess(mockReq as Request, mockRes as Response, mockNext);
+      await checkAgentAccess(mockReq as ServerRequest & { user?: IUser }, mockRes as Response, mockNext);
 
       // Should skip check because endpoint is not agents
       expect(mockNext).toHaveBeenCalled();
@@ -503,7 +503,7 @@ describe('access middleware', () => {
         getRoleByName: mockGetRoleByName,
       });
 
-      await checkPromptAccess(mockReq as Request, mockRes as Response, mockNext);
+      await checkPromptAccess(mockReq as ServerRequest & { user?: IUser }, mockRes as Response, mockNext);
       expect(mockNext).toHaveBeenCalled();
     });
 
@@ -525,7 +525,7 @@ describe('access middleware', () => {
         getRoleByName: mockGetRoleByName,
       });
 
-      await checkBookmarkAccess(mockReq as Request, mockRes as Response, mockNext);
+      await checkBookmarkAccess(mockReq as ServerRequest & { user?: IUser }, mockRes as Response, mockNext);
       expect(mockNext).toHaveBeenCalled();
     });
 

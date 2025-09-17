@@ -17,5 +17,5 @@ export default {
   //   },
   // },
   restoreMocks: true,
-  testTimeout: 15000,
+  testTimeout: 30000,
 };

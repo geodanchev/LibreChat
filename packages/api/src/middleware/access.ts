@@ -67,7 +67,7 @@ export const checkAccess = async ({
     const hasAnyPermission = permissions.every((permission) => {
       if (
         role.permissions?.[permissionType as keyof typeof role.permissions]?.[
-          permission as keyof (typeof role.permissions)[typeof permissionType]
+        permission as keyof (typeof role.permissions)[typeof permissionType]
         ]
       ) {
         return true;
@@ -109,7 +109,7 @@ export const generateCheckAccess = ({
   bodyProps?: Record<Permissions, string[]>;
   skipCheck?: (req?: ServerRequest) => boolean;
   getRoleByName: (roleName: string, fieldsToSelect?: string | string[]) => Promise<IRole | null>;
-}): ((req: ServerRequest, res: ServerResponse, next: NextFunction) => Promise<unknown>) => {
+}): ((req: ServerRequest & { user?: IUser }, res: ServerResponse, next: NextFunction) => Promise<unknown>) => {
   return async (req, res, next) => {
     try {
       const hasAccess = await checkAccess({

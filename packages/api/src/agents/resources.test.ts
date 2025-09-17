@@ -1,5 +1,5 @@
 import { primeResources } from './resources';
-import { logger } from '@librechat/data-schemas';
+import { logger, IUser } from '@librechat/data-schemas';
 import { EModelEndpoint, EToolResources, AgentCapabilities } from 'librechat-data-provider';
 import type { Request as ServerRequest } from 'express';
 import type { TFile } from 'librechat-data-provider';
@@ -13,7 +13,7 @@ jest.mock('@librechat/data-schemas', () => ({
 }));
 
 describe('primeResources', () => {
-  let mockReq: ServerRequest;
+  let mockReq: ServerRequest & { user?: IUser };
   let mockGetFiles: jest.MockedFunction<TGetFiles>;
   let requestFileSet: Set<string>;
 
@@ -22,15 +22,7 @@ describe('primeResources', () => {
     jest.clearAllMocks();
 
     // Setup mock request
-    mockReq = {
-      app: {
-        locals: {
-          [EModelEndpoint.agents]: {
-            capabilities: [AgentCapabilities.ocr],
-          },
-        },
-      },
-    } as unknown as ServerRequest;
+    mockReq = {} as unknown as ServerRequest & { user?: IUser };
 
     // Setup mock getFiles function
     mockGetFiles = jest.fn();
@@ -927,7 +919,7 @@ describe('primeResources', () => {
 
   describe('edge cases', () => {
     it('should handle missing app.locals gracefully', async () => {
-      const reqWithoutLocals = {} as ServerRequest;
+      const reqWithoutLocals = {} as ServerRequest & { user?: IUser };
 
       const result = await primeResources({
         req: reqWithoutLocals,
