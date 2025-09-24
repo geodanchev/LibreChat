@@ -7,6 +7,7 @@ const { HttpsProxyAgent } = require('https-proxy-agent');
 const { hashToken, logger } = require('@librechat/data-schemas');
 const { CacheKeys, ErrorTypes } = require('librechat-data-provider');
 const { Strategy: OpenIDStrategy } = require('openid-client/passport');
+const { PROVIDER_MAPPERS } = require('./customOpenIdDataRetrieval.js')
 const {
   isEnabled,
   logHeaders,
@@ -98,6 +99,14 @@ This violates RFC 7235 and may cause issues with strict OAuth clients. Removing 
 /** @typedef {Configuration | null}  */
 let openidConfig = null;
 
+async function mapCustomOpenIdData(accessToken, customOpenIdFields) {
+  const mapper = PROVIDER_MAPPERS[process.env.OPENID_CUSTOM_DATA_PROVIDER]
+  if (!mapper) {
+    throw new Error(`No mapper found for provider: ${provider}`);
+  }
+  customData = await mapper(accessToken, customOpenIdFields);
+  return customData;
+}
 //overload currenturl function because of express version 4 buggy req.host doesn't include port
 //More info https://github.com/panva/openid-client/pull/713
 
@@ -444,6 +453,19 @@ async function setupOpenId() {
             if (userinfo.email && userinfo.email !== user.email) {
               user.email = userinfo.email;
               user.emailVerified = userinfo.email_verified || false;
+            }
+          }
+          // handle custom OPENID data retrieval
+          const customOpenIdFields = process.env.OPENID_CUSTOM_DATA ? process.env.OPENID_CUSTOM_DATA.split(" ") : [];
+          if (customOpenIdFields.length > 0) {
+            try {
+              const retrievedCustomData = await mapCustomOpenIdData(tokenset.access_token, customOpenIdFields);
+              user.customOpenIdData = new Map(Object.entries(retrievedCustomData));
+              logger.info(`[openidStrategy] customOpenIdData retrieved : ${JSON.stringify(Object.fromEntries(user.customOpenIdData))}`);
+            }
+            catch (e) {
+              logger.error(`[openidStrategy] load custom OPENID data failed with error :${e.message}`);
+              user.customOpenIdData = new Map(Object.entries({ error: 'true', message: e.message }));
             }
           }
 

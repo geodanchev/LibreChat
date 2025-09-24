@@ -132,6 +132,10 @@ const userSchema = new Schema<IUser>(
       type: Boolean,
       default: false,
     },
+    customOpenIdData: {
+        type: Map,
+        of: String
+    },
     personalization: {
       type: {
         memories: {
