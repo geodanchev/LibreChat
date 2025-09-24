@@ -2,40 +2,68 @@ const { logger } = require('~/config');
 
 const options = [
   {
-    label: 'com_ui_idea',
-    value: 'idea',
+    label: 'General',
+    value: 'com_ui_general',
   },
   {
-    label: 'com_ui_travel',
-    value: 'travel',
+    label: 'Business Applications',
+    value: 'com_ui_business_applications',
   },
   {
-    label: 'com_ui_teach_or_explain',
-    value: 'teach_or_explain',
+    label: 'Customer Success',
+    value: 'com_ui_client_experience',
   },
   {
-    label: 'com_ui_write',
-    value: 'write',
+    label: 'IT',
+    value: 'com_ui_it',
   },
   {
-    label: 'com_ui_shop',
-    value: 'shop',
+    label: 'Education Hub',
+    value: 'com_ui_education_hub',
   },
   {
-    label: 'com_ui_code',
-    value: 'code',
+    label: 'Engineering',
+    value: 'com_ui_engineering',
   },
   {
-    label: 'com_ui_misc',
-    value: 'misc',
+    label: 'Finance',
+    value: 'com_ui_finance',
   },
   {
-    label: 'com_ui_roleplay',
-    value: 'roleplay',
+    label: 'Management',
+    value: 'com_ui_management',
   },
   {
-    label: 'com_ui_finance',
-    value: 'finance',
+    label: 'Marketing',
+    value: 'com_ui_marketing',
+  },
+  {
+    label: 'People and Culture',
+    value: 'com_ui_people_and_culture',
+  },
+  {
+    label: 'Product Management',
+    value: 'com_ui_product_management',
+  },
+  {
+    label: 'Professional Services',
+    value: 'com_ui_professional_services',
+  },
+  {
+    label: 'Sales',
+    value: 'com_ui_sales',
+  },
+  {
+    label: 'Strategy and Controlling',
+    value: 'com_ui_strategy_and_controlling',
+  },
+  {
+    label: 'Support',
+    value: 'com_ui_support',
+  },
+  {
+    label: 'S&C Enablement',
+    value: 'com_ui_academy',
   },
 ];
 
