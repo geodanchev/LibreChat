@@ -200,7 +200,7 @@ class STTService {
     const url = `${genAzureEndpoint({
       azureOpenAIApiInstanceName: extractEnvVariable(sttSchema?.instanceName),
       azureOpenAIApiDeploymentName: extractEnvVariable(sttSchema?.deploymentName),
-    })}/audio/transcriptions?api-version=${extractEnvVariable(sttSchema?.apiVersion)}`;
+    })}/audio/translations?api-version=${extractEnvVariable(sttSchema?.apiVersion)}`;
 
     const apiKey = sttSchema.apiKey ? extractEnvVariable(sttSchema.apiKey) : '';
 
