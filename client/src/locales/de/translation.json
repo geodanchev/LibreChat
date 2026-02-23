@@ -1155,7 +1155,7 @@
   "com_ui_share_var": "{{0}} teilen",
   "com_ui_shared_link_bulk_delete_success": "Geteilte Links erfolgreich gelöscht",
   "com_ui_shared_link_delete_success": "Geteilter Link erfolgreich gelöscht",
-  "com_ui_shared_link_not_found": "Geteilter Link nicht gefunden",
+  "com_ui_shared_link_not_found": "Bitte loggen Sie sich in einem separaten Browser-Tab bei ai.docuware.com ein und versuchen Sie Ihren geteilten Link erneut. Wenn Sie bereits eingeloggt sind, überprüfen Sie bitte, ob der Link korrekt ist.",
   "com_ui_shared_prompts": "Geteilte Prompts",
   "com_ui_shop": "Einkaufen",
   "com_ui_show_all": "Alle anzeigen",

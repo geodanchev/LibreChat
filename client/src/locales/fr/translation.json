@@ -961,7 +961,7 @@
   "com_ui_share_var": "Partager {{0}}",
   "com_ui_shared_link_bulk_delete_success": "Suppression réussie des liens partagés",
   "com_ui_shared_link_delete_success": "Suppression réussie du lien partagé",
-  "com_ui_shared_link_not_found": "Lien partagé introuvable",
+  "com_ui_shared_link_not_found": "Veuillez vous connecter à ai.docuware.com dans un onglet de navigateur distinct et réessayez votre lien partagé. Si vous êtes déjà connecté, veuillez vérifier que le lien est correct.",
   "com_ui_shared_prompts": "Prompts partagés",
   "com_ui_shop": "Faire des achats",
   "com_ui_show_all": "Tout afficher",

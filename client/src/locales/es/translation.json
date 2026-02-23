@@ -704,7 +704,7 @@
   "com_ui_share_link_to_chat": "Compartir enlace en el chat",
   "com_ui_share_update_message": "Tu nombre, instrucciones personalizadas y cualquier mensaje que agregues después de compartir se mantendrán privados.",
   "com_ui_share_var": "Compartir {{0}}",
-  "com_ui_shared_link_not_found": "Enlace compartido no encontrado",
+  "com_ui_shared_link_not_found": "Por favor, inicie sesión en ai.docuware.com en una pestaña del navegador separada e intente de nuevo con su enlace compartido. Si ya ha iniciado sesión, por favor, verifique que el enlace sea correcto.",
   "com_ui_shared_prompts": "Prompts Compartidos",
   "com_ui_shop": "Compras",
   "com_ui_show_all": "Mostrar Todo",

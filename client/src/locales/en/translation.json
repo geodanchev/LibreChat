@@ -1162,7 +1162,7 @@
   "com_ui_share_var": "Share {{0}}",
   "com_ui_shared_link_bulk_delete_success": "Successfully deleted shared links",
   "com_ui_shared_link_delete_success": "Successfully deleted shared link",
-  "com_ui_shared_link_not_found": "Shared link not found",
+  "com_ui_shared_link_not_found": "Please log in to ai.docuware.com in a separate browser tab and try your shared link again. If you are already logged in, please check that the link is correct.",
   "com_ui_shared_prompts": "Shared Prompts",
   "com_ui_shop": "Shopping",
   "com_ui_show_all": "Show All",
